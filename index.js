@@ -4,24 +4,22 @@ const MongoClient = require("mongodb").MongoClient;
 require("dotenv").config({ path: "./config/.env" });
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const { ReplSet } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
-
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.aquaz.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 //middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(fileupload());
 
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.aquaz.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+
 app.get("/", (req, res) => {
   res.send("hello world");
 });
 
-const client = new MongoClient(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+const client = new MongoClient(uri, { useUnifiedTopology: true });
 client.connect((err) => {
   const allrenthousedatacollection = client
     .db("Apartment-hunt")
@@ -30,16 +28,47 @@ client.connect((err) => {
   const allorderscollection = client
     .db("Apartment-hunt")
     .collection("allorders");
+
   //get orders by email
   app.get("/getorderbyemail/:email", (req, res) => {
     const email = req.params.email;
     if (email) {
       allorderscollection.find({ email: email }).toArray((err, documents) => {
-        res.send(documents);
+        if (documents) {
+          res.send(documents);
+        }
+        if (err) {
+          res.send(err);
+        }
       });
     } else {
       res.send("email was not send ");
     }
+  });
+  //get all orders
+  app.get("/getallorders", (req, res) => {
+    allorderscollection.find({}).toArray((err, documents) => {
+      if (documents) {
+        res.send(documents);
+      }
+      if (err) {
+        res.send(err);
+      }
+    });
+  });
+  //search rent house
+  app.get("/getrenthousebysearch", (req, res) => {
+    const search = req.query.search;
+    allrenthousedatacollection
+      .find({ title: { $regex: search } })
+      .toArray((err, documents) => {
+        if (documents) {
+          res.send(documents);
+        }
+        if (err) {
+          res.send(err);
+        }
+      });
   });
 
   // add rent house
