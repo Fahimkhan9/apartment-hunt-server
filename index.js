@@ -45,6 +45,17 @@ client.connect((err) => {
       res.send("email was not send ");
     }
   });
+  //get all data
+  app.get("/getalldata", (req, res) => {
+    allrenthousedatacollection.find({}).toArray((err, documents) => {
+      if (documents) {
+        res.send(documents);
+      }
+      if (err) {
+        res.send(err);
+      }
+    });
+  });
   //get all orders
   app.get("/getallorders", (req, res) => {
     allorderscollection.find({}).toArray((err, documents) => {
