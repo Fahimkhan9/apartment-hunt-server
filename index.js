@@ -6,6 +6,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const app = express();
 const port = process.env.PORT || 5000;
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.aquaz.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 //middleware
 app.use(cors());
@@ -25,6 +26,22 @@ client.connect((err) => {
   const allrenthousedatacollection = client
     .db("Apartment-hunt")
     .collection("allrenthousedata");
+
+  const allorderscollection = client
+    .db("Apartment-hunt")
+    .collection("allorders");
+  //get orders by email
+  app.get("/getorderbyemail/:email", (req, res) => {
+    const email = req.params.email;
+    if (email) {
+      allorderscollection.find({ email: email }).toArray((err, documents) => {
+        res.send(documents);
+      });
+    } else {
+      res.send("email was not send ");
+    }
+  });
+
   // add rent house
   app.post("/addrenthouse", (req, res) => {
     try {
