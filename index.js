@@ -4,7 +4,7 @@ const MongoClient = require("mongodb").MongoClient;
 require("dotenv").config({ path: "./config/.env" });
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const { ReplSet } = require("mongodb");
+
 const app = express();
 const port = process.env.PORT || 5000;
 //middleware
@@ -134,6 +134,4 @@ client.connect((err) => {
   console.log("db connection");
 });
 
-app.listen(port, () => {
-  console.log(`running at ${port}`);
-});
+app.listen(port);
